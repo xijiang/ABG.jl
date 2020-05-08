@@ -72,7 +72,7 @@ function fr2ped(dir::AbstractString,
                 end
                 for line in eachline(rp)
                     ilc += 1
-                    id, a, b = [split(line)[i] for i in [2, x, y]]
+                    id, a, b = [split(line, '\t')[i] for i in [2, x, y]]
                     isvalid(a[1]) && (gt[ilc*2-1] = a[1])
                     isvalid(b[1]) && (gt[ilc * 2] = b[1])
                 end
