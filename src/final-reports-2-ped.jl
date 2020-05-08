@@ -1,28 +1,3 @@
-##################################################
-"""
-    ref_map_dict(fmap::String)
----
-This create a dictionary of SNP -> [chr, bp] and return it
-
-# Notes
-1. chromosome
-2. SNP-name
-3. linkage distance, can be 0
-4. base pari position
-"""
-function ref_map_dict(fmap)     # fmap: the physical map
-    snpdic = Dict()
-    open(fmap, "r") do io
-        while !eof(io)
-            snp, chr, bp = split(readline(io))
-            snpdic[snp] = [chr, bp]
-        end
-    end
-
-    return snpdic
-end
-
-################################################################################
 """
     fr2ped(dir, list, ped, allele)
 ---
