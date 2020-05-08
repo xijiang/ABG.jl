@@ -7,6 +7,7 @@
 """
     function ped_n_map_to_bed(ped, map, out, species = "cow")
 ---
+
 Convert
  - `ped`: e.g., plink.ped
  - `map`: e.g., plink.map
@@ -29,6 +30,7 @@ end
 """
     extract_bed_subset(src, snp, out, species = "cow")
 ---
+
 Extract a subset of
  - `src`: src.{bed,bim,fam}
 according to
@@ -51,6 +53,7 @@ end
 """
    miss_allele_stats(bfile, out, species = "cow", chr="1-29")
 ---
+
 Do statistics of missing values in `bfile`, and output them to `out`
 """
 function miss_allele_stats(bfile::AbstractString,
@@ -68,6 +71,7 @@ end
 """
     allele_maf_stats(bfile, out, species = "cow", chr = "1-29")
 ---
+
 Do MAF statistics of `bfile`, and output to `out`.
 """
 function allele_maf_stats(bfile::AbstractString,
@@ -86,6 +90,7 @@ end
 """
     hwe_stats(bfile, out, species = "cow", chr = "1-29")
 ---
+
 Hardy-Weinberg equillibrium test.
 """
 function hwe_stats(bfile::AbstractString,
@@ -103,6 +108,7 @@ end
 """
     plink_merge(list, out, species = "cow")
 ---
+
 - `list`: the fine name which contains a bunch of bfiles
 """
 function plink_merge(list::AbstractString,
@@ -118,6 +124,7 @@ end
 """
     plink_2_vcf(src::AbstractString, out::AbstractString, species::AbstractString = "cow")
 ---
+
 Convert plink bed files to out in vcf format
 """
 function plink_2_vcf(src::AbstractString,
@@ -133,6 +140,7 @@ end
 """
     vcf_2_plink(src::AbstractString, out::AbstractString, species::AbstractString = "cow")
 ---
+
 Convert a VCF file to plink.{bed,bim,fam}
 """
 function vcf_2_plink(src::AbstractString,
@@ -148,6 +156,7 @@ end
 """
     bed_2_map_n_ped(src::AbstractString, out::AbstractString, species::AbstractString = "cow")
 ---
+
 Recode `plink.{bed,bim,fam}` to `plink.{map,ped}`.
 """
 function bed_2_map_n_ped(src::AbstractString,
@@ -164,6 +173,7 @@ end
 """
     plink_filter_snp(src::AbstractString, geno, maf, hwe, out, species = "cow")
 ---
+
 - Refer: https://github.com/pcgoddard/Burchardlab_Tutorials/wiki/PLINK:-Quality-Control
 
 Filter `src` in bed format according to geno, maf, and hwe to `target` in bed format. where,
@@ -190,6 +200,7 @@ end
 """
     plink_filter_id(src, mind, out, species = "cow")
 ---
+
 Remove ID with missing allele rate over `mind`
 """
 function plink_filter_id(src::AbstractString,
