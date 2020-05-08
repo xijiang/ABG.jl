@@ -33,22 +33,23 @@ function fr2ped(dir::AbstractString,
 
         # find allele columns
         header = split(readline(io), '\t')
-        fields = split(readline(io)) # first record
+        fields = split(readline(io), '\t') # first record
         n = 0
         for f in fields
             n += 1
-            println(n, '\t', header[n], '\t', f)
+            (length(f) > 0) && println(n, '\t', header[n], '\t', f)
             if occursin("Allele1", header[n]) && split(header[n], ' ')[3] == allele
                 x, y = n, n+1
             end
         end
+        x > 0 || error("Allele $allele designation not found in these final reports")
+        length(fields[x]) > 0 || error("The columns found for '$allele' are empty")
         n = 1
         for _ in eachline(io)
             n += 1
         end
         n == nlc || error("Number of SNP available, $n is different from $nlc stated in the header")
     end
-    x > 0 || error("Allele $allele designation not found in these final reports")
     message("Genotypes in $allele format are in column $x and $y.\n" *
             "A total of $nlc loci found in this report")
 
