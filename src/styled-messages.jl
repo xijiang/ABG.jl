@@ -20,7 +20,7 @@ end
 Print a warning.
 """
 function warning(msg::AbstractString)
-    printstyled(msg, '\n'; color=229)
+    printstyled('\n', msg, '\n'; color=229)
 end
 
 """
