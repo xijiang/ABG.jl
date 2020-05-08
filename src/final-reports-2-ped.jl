@@ -37,6 +37,7 @@ function fr2ped(dir::AbstractString,
         n = 0
         for f in fields
             n += 1
+            n <= length(header) || break
             (length(f) > 0) && println(n, '\t', header[n], '\t', f)
             if occursin("Allele1", header[n]) && split(header[n], ' ')[3] == allele
                 x, y = n, n+1
