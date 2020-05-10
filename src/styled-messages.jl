@@ -6,7 +6,7 @@ Print a title.
 """
 function title(msg::AbstractString)
     printstyled('\n', msg, '\n', bold = true, color = :cyan)
-    printstyled(repeat('=', length(msg)), '\n', color=31)
+    printstyled(repeat('=', length(msg) + 2), '\n', color=31)
 end
 
 """
