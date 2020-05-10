@@ -7,6 +7,7 @@ module ABG
 # export empty_dir
 # export title, message, warning, item, done
 # export fr2ped
+plink = "bin/plink"             # Update this in you own environment
 
 include("styled-messages.jl")
 include("final-reports-2-ped.jl")
