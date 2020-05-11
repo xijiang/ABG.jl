@@ -64,7 +64,7 @@ function fr2ped(dir::AbstractString,
         for report in list
             cnt += 1
             id = ""::String
-            gt = fill('0', nlc*2)
+            gt = fill('0', nlc*2) # default plink missing value is '0'
             ilc = 0
             print("\r Dealing with $report, number $cnt")
             open(joinpath(dir, report), "r") do rp
