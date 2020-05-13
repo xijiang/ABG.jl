@@ -9,19 +9,19 @@ Given a `list` of final report files, this function merge them into one file
 The function will analyse the first file in the list to see if `allele` format
 e.g., `Top`, `AB`", `Forward`, `Design`, or `Plus`, is available.  The column
 number will be recorded. If not found, it raises an error.  By default, `allele`
-is of `AB` format.
+is of `Top` format.
 
 # Example
 ```
 dir = "path-to-final-reports"
 list = readdir(dir)
-fr2ped(dir, list, "path-to/plink.ped", allele="AB")
+fr2ped(dir, list, "path-to/plink.ped", allele="Top")
 ```
 """
 function fr2ped(dir::AbstractString,
                 list,
                 ped::AbstractString,
-                allele::AbstractString = "AB")
+                allele::AbstractString = "Top")
     item("Analyse fields")
     nlc = x = y = 0
     open(joinpath(dir, list[1]), "r") do io
@@ -66,7 +66,7 @@ function fr2ped(dir::AbstractString,
             id = ""::String
             gt = fill('0', nlc*2) # default plink missing value is '0'
             ilc = 0
-            print("\r Dealing with $report, number $cnt")
+            print("\r Dealing with $report, number $cnt                    ")
             open(joinpath(dir, report), "r") do rp
                 for line in eachline(rp) # skip header
                     occursin("SNP Name", line) && break
