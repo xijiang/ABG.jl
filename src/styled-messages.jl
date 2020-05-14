@@ -10,6 +10,14 @@ function title(msg::AbstractString)
 end
 
 """
+Print a subtitle.
+"""
+function subtitle(msg::AbstractString)
+    printstyled('\n', msg, '\n', color = :cyan)
+    printstyled(repeat('-', length(msg) + 2), '\n', color=31)
+end
+
+"""
 Print a message.
 """
 function message(msg::AbstractString)
