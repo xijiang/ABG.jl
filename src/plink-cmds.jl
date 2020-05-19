@@ -214,3 +214,20 @@ function plink_filter_id(src::AbstractString,
 		     --out $out`,
              String)
 end
+
+"""
+    plink_keep_id(src, list, out, species = "cow")
+---
+Rewrite `src` to `out`, with the ID names specified in `list`.
+"""
+function plink_keep_id(src::AbstractString,
+                       list::AbstractString,
+                       out::AbstractString,
+                       species::AbstractString = "cow")
+    _ = read(`$plink --$species
+		     --bfile $src
+		     --keep $list
+		     --make-bed
+		     --out $out`,
+             String)
+end

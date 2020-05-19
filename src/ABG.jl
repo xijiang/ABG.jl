@@ -1,5 +1,16 @@
+"""
+Xijiang's breeding algorithms implemented in Julia and C++.
+"""
 module ABG
+using SparseArrays, LinearAlgebra, Serialization
 
+plink = "bin/plink"             # Update this in your own environment
+
+# v0.2
+include("makefile.jl")
+include("a-inverse.jl")
+
+# v0.1
 ################################################################################
 # export ped_n_map_to_bed, bed_snp_subset, miss_allele_stats, allele_maf_stats
 # export hwe_stats, merge_beds, plink_2_vcf, vcf_2_plink, bed_2_map_n_ped
@@ -7,8 +18,6 @@ module ABG
 # export empty_dir
 # export title, message, warning, item, done
 # export fr2ped
-plink = "bin/plink"             # Update this in you own environment
-
 include("styled-messages.jl")
 include("final-reports-2-ped.jl")
 include("work-flow.jl")

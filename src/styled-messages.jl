@@ -52,7 +52,8 @@ function test_my_styled_printing()
     end
     println()
 
-    title("This is a title using color cyan and 154")
+    title("This is a title using bold, color cyan and 154")
+    subtitle("This is a subtitle using color cyan and 154")
     item("Item 1 using color 74")
     item("Item 2")
     message("A description message using color :light_magenta")
