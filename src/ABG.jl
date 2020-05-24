@@ -16,6 +16,7 @@ abgCpp = joinpath(abgDir, "cpp")
 # v0.2
 include("makefile.jl")
 include("a-matrix.jl")
+include("g-matrix.jl")
 
 # v0.1
 ################################################################################

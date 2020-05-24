@@ -1,73 +1,38 @@
+/**
+ * This program read pedigree from stdin.  Then it calculate D vector and 
+ * T matrix corresponding everybody in the pedigree.
+ *
+ * Note:
+ *   - I only use this program in my Julia codes, hence error checks are omitted.
+ *   - No log text are output, as this procedure are just fast.
+ *   - Other logs are done in the Julia codes.
+ *
+ * Output:
+ *   - vector size nid::Int, which is also the dimension of the T matrix.
+ *   - nid of elements in D.
+ *   - id-1, id-2, elment: of the sparse matrix T.
+ */
+
 #include <iostream>
 #include <fstream>
 #include <vector>
 #include <map>
-#include <tuple>
-#include <algorithm>
+#include <set>
+#include <utility>
+#include <limits>
 
 using namespace std;
-using PM =tuple<int, int>;
+using PM =pair<int, int>;
 using PED=vector<PM>;
 using MID=map<PM, double>;	// store intermediate resultes
 
-bool nARG(int argc, string cmd){
-  if(argc!=3){
-    cerr<<"Usage: cat a-pedigree | " << cmd << " option ID-list\n";
-    cerr<<"\n where options:\n";
-    cerr<<"     A/a: calculate A matrix, output binary format\n";
-    cerr<<"     F/f: inbreeding values of the ID\n";
-    cerr<<"     T/t: diagonal D inverse and T inverse for calculation A inverse\n";
-    //cerr<<"     V/v: inverse of the A matrix\n";
-    return false;
-  }
-  return true;
-}
-
-
-bool read_ped(istream&in, PED&ped){
-  clog<<"LOG: Reading the pedigree ...\n";
-  ped.push_back({0,0});		// the magic dummy
-				// hence, row number is ID number id starts from 1.
-  for(int pa, ma; in>>pa>>ma; ped.push_back({pa, ma}))
-    if(pa>=static_cast<int>(ped.size())
-       || ma>=static_cast<int>(ped.size())
-       || pa<0 || ma<0){
-      cerr<<"ERROR: Invalid pa / ma ID\n";
-      return false;
-    }
-  return true;
-}
-
-
-bool read_list(string file, vector<int>&ilist, size_t nid){
-  clog<<"LOG: Reading the ID list ...\n";
-  
-  int oid{0};
-  ifstream fin(file);
-  if(!fin.is_open()){
-    cerr << "File not exists\n";
-    return false;
-  }
-  for(int id; fin>>id; ilist.push_back(id)){
-    if(id>static_cast<int>(nid) || id<0){
-      cerr<<"ERROR: ID not in the pedigree\n";
-      return false;		// id must be in 1:nid and sorted
-    }
-    if(id<=oid) clog<<"Warning: ID list not sorted\n";
-    oid = id;
-  }
-  return true;
-}
-
-
 double Amat(int i, int j, const PED &ped, MID&mid){
-  // clog<<i<<' '<<j<<'\n'; //uncomment this to check the stack
   if(i==0 || j==0) return 0;	// so that relationship with un unknown is not stored in mid
   
-  if(i>j) swap(i, j);
+  if(i>j) swap(i, j);		// in <algorithms>, but may be included by utility or limits.
   
-  // Look up if {i,j} was calculated or not
-  if(mid.find({i, j})!=mid.end()) return mid[{i, j}];
+  // Look up if {i,j} was calculated before
+  if(mid.find({i, j}) != mid.end()) return mid[{i, j}];
 
   const auto &[pa, ma] = ped[j];
   if(i==j)
@@ -78,79 +43,90 @@ double Amat(int i, int j, const PED &ped, MID&mid){
   return mid[{i, j}];
 }
 
-void DnT(const PED&ped, MID&mid, vector<int>&ilist){
-  ofstream dfile{"D.vec"}, tfile{"T.mat"};
-  // Inbred coefficients of parents of ilist
-  map<int, double> pma;
-  pma[0] = -1;
-  for(const auto&id:ilist){
-    const auto&[pa, ma] = ped[id];
-    if(pma.find(pa)==pma.end()) pma[pa] = Amat(pa, pa, ped, mid) -1;
-    if(pma.find(ma)==pma.end()) pma[ma] = Amat(ma, ma, ped, mid) -1;
-  }
-
-  dfile.precision(12);
-
-  // directly write D and Ti to file
-  for(const auto&id:ilist){
-    const auto&[pa, ma] = ped[id];
-
-    // D inverse
-    dfile << 1./(.5 - .25*(pma[pa] + pma[ma])) << '\n';
-
-    // T inverse
-    auto putT = [](int a, int b, int c, ostream&tfile){
-		  if(a) tfile << c << ' ' << a << ' ' << -.5 << '\n';
-		  if(b) tfile << c << ' ' << b << ' ' << -.5 << '\n';
-		  tfile       << c << ' ' << c << ' ' <<   1 << '\n';
-		};
-    if(pa<ma) putT(pa, ma, id, tfile);
-    else      putT(ma, pa, id, tfile);
-  }
+void putT(int a, int b, int c){
+  if(a) cout << c << ' ' << a << ' ' << -.5 << '\n';
+  if(b) cout << c << ' ' << b << ' ' << -.5 << '\n';
+  cout       << c << ' ' << c << ' ' <<   1 << '\n';
 }
 
 int main(int argc, char *argv[])
 {
-  if(!nARG(argc, argv[0])) return 1;
-  
   PED ped;			// the pedigree to look up
-  if(!read_ped(cin, ped)) return 2;
+  int nid{0};
 
-  vector<int> ilist;
+  ped.push_back({0,0});	// the magic dummy
+  // hence, row number is ID number id starts from 1.
+  for(int pa, ma; cin>>pa>>ma; ped.push_back({pa, ma})){
+    ++nid;
+    if(pa >= nid ||
+       ma >= nid ||
+       pa <  0   ||
+       ma <  0      ){		// error check on the pedigree
+      cerr << "ERROR: Invalid pa / ma ID @ line number: " << nid << endl;
+      return 1;
+    }
+  }
+
   map<PM, double> mid;		// store the mid results of Amat
-  
+  set<int> ilist;
+  map<int, double> pma;
+
+  typedef numeric_limits<double> dbl; // to avoid binary I/O
+  cout.precision(dbl::max_digits10);
+
+  if(argc == 1){
+    cerr << "Please specify what you are going to do [AaFfDdTt]. " << endl;
+    return 2;
+  }
   switch(argv[1][0]){
   case 'A':
   case 'a':
-    clog<<"Calculate A matrix of listed ID\n";
-    if(!read_list(argv[2], ilist, ped.size()-1)) return 3;
-    for(auto&i:ilist)
-      for(auto&j:ilist){
-	if(j>i) break;
-	cout<<i<<'\t'<<j<<'\t'<<Amat(i, j, ped, mid)<<'\n';
-      }
+    if(argc == 2 || string(argv[2]).length()==0)
+      for(auto id{1}; id<=nid; ++id) ilist.insert(id);
+    else{
+      ifstream fin(argv[2]);
+      for(int id; fin>>id; ilist.insert(id))
+  	if(id > nid || id < 1){
+  	  cerr << "Invalid ID: " << id << '\n';
+  	  return 3;
+  	}
+    }
+    cout << ilist.size() << '\n';
+    for(const auto&id:ilist) cout << id <<'\n';
+    for(const auto&id:ilist){
+      for(const auto&jd:ilist)	cout << ' ' << Amat(id, jd, ped, mid);
+      cout << "\n";
+    }
     break;
-    
   case 'F':
   case 'f':
-    clog<<"Calculate inbreeding values of listed ID\n";
-    if(!read_list(argv[2], ilist, ped.size()-1)) return 3;
-    for(auto&id:ilist) cout<<id<<'\t'<<Amat(id, id, ped, mid) - 1<<'\n';
+    for(auto id{1}; id<=nid; ++id)
+      cout << Amat(id, id, ped, mid) - 1. <<'\n';
     break;
-
+  case 'D':
+  case 'd':
   case 'T':
   case 't':
-    clog<<"Calculate inverse D and T matrix for inverse A construction\n";
-    clog<<"Results are in D.vec and Ti.mat.\n";
-    if(!read_list(argv[2], ilist, ped.size()-1)) return 3;
-    DnT(ped, mid, ilist);
+    pma[0] = -1;
+  
+    cout << nid << '\n';
+  
+    for(auto id{1}; id<=nid; ++id){
+      const auto&[pa, ma] = ped[id];
+      if(pma.find(pa) == pma.end()) pma[pa] = Amat(pa, pa, ped, mid) - 1.;
+      if(pma.find(ma) == pma.end()) pma[ma] = Amat(ma, ma, ped, mid) - 1.;
+      cout << 1./(.5 - .25*(pma[pa] + pma[ma])) << '\n';
+    }
+  
+    for(auto id{1}; id<=nid; ++id){
+      const auto&[pa, ma] = ped[id];
+      if(pa<ma) putT(pa, ma, id);
+      else      putT(ma, pa, id);
+    }    
     break;
-    
   default:
-    cerr<<"ERROR: Invalid option \'"<<argv[1]<<"\'\n";
+    cerr << "I have no idea about what you are asking." <<endl;
     return 4;
   }
-
-  clog<<"LOG: Number of items of intermediate results: "<<mid.size()<<'\n';
   return 0;
 }

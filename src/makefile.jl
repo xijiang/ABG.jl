@@ -10,15 +10,15 @@ function make()
     isdir(abgBin) || mkdir(abgBin)
 
     message("Compiling ABG C++ codes in `cpp` into `bin`")
-    bins = ["dnt",
-            "inbreeding-coefficient"]
+    bins = ["amat"]
+    width = 70
     for bin in bins
         if (!isfile("$abgBin/$bin")) || (stat("$abgBin/$bin").mtime < stat("$abgCpp/$bin.cpp").mtime)
-            print(lpad("g++ -O2 -Wall -std=c++17 -o bin/$bin cpp/$bin.cpp", 50))
+            print(lpad("g++ -O2 -Wall -std=c++17 -o bin/$bin cpp/$bin.cpp", width))
             run(`g++ -O2 -Wall -std=c++17 -o $abgBin/$bin $abgCpp/$bin.cpp`)
             done()
         else
-            print(lpad("bin/$bin", 50))
+            print(lpad("bin/$bin", width))
             done("OK")
         end
     end

@@ -15,7 +15,7 @@ See `dat/henderson1976.ped` for example.
 """
 function A_inverse(ped::AbstractString)
     Ai = Any
-    open(pipeline(`cat $ped`, `$abgBin/dnt`), "r") do io
+    open(pipeline(`cat $ped`, `$abgBin/amat D`), "r") do io
         nid = parse(Int, readline(io))
         D = Float64[]
         for _ in 1:nid
@@ -45,7 +45,7 @@ coefficient of everybody in the pedigree.
 """
 function inbreeding_coefficient(ped::AbstractString)
     ic = Float64[]
-    open(pipeline(`cat $ped`, `$abgBin/inbreeding-coefficient`), "r") do io
+    open(pipeline(`cat $ped`, `$abgBin/amat F`), "r") do io
         for line in eachline(io)
             t = parse(Float64, line)
             push!(ic, t)
@@ -54,3 +54,29 @@ function inbreeding_coefficient(ped::AbstractString)
     return ic
 end
 
+"""
+    A_matrix(ped::AbstractString, list::AbstractString="")
+---
+Given a 2-column pedigree file `ped`, this function calculate an **`A`** matrix.
+IF a subset of ID `list` of the predigree is given, this gives a partial
+**`A`** matrix. Inverse of this partial **`A`** can be done within `Julia`.
+"""
+function A_matrix(ped::AbstractString, list::AbstractString="")
+    ID = Int[]
+    A = Float64[]
+    println(ped)
+    open(pipeline(`cat $ped`, `$abgBin/amat A $list`), "r") do io
+        nid = parse(Int, readline(io))
+        for _ in 1:nid
+            id = parse(Int, readline(io))
+            push!(ID, id)
+        end
+        for line in eachline(io)
+            for elm in split(line)
+                push!(A, parse(Float64, elm))
+            end
+        end
+        reshape(A, (nid, nid))
+    end
+    return ID, A
+end
