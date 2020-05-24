@@ -5,10 +5,17 @@ module ABG
 using SparseArrays, LinearAlgebra, Serialization
 
 plink = "bin/plink"             # Update this in your own environment
+abgDir = begin
+    t = splitdir(pathof(ABG))[1]
+    l = findlast('/', t)
+    SubString(t, 1:l)
+end
+abgBin = joinpath(abgDir, "bin")
+abgCpp = joinpath(abgDir, "cpp")
 
 # v0.2
 include("makefile.jl")
-include("a-inverse.jl")
+include("a-matrix.jl")
 
 # v0.1
 ################################################################################

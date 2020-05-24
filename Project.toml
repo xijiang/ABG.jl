@@ -1,7 +1,7 @@
 name = "ABG"
 uuid = "6f4575a6-10e7-48b2-be77-2501b81e0c82"
 authors = ["Xijiang Yu <xijiang@users.noreply.github.com>"]
-version = "0.2.0"
+version = "0.2.1"
 
 [deps]
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
