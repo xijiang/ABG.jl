@@ -231,3 +231,16 @@ function plink_keep_id(src::AbstractString,
 		     --out $out`,
              String)
 end
+
+"""
+    plink_012(src, out, species = "cow")
+---
+Convert plink `bed` to `012` genotypes.
+"""
+function plink_012(src, out, species = "cow")
+    _ = read(`$plink --$speces
+		     --bfile $src
+		     --recode A
+		     --out $out`,
+             String)
+end
