@@ -14,6 +14,7 @@ matrix inversed.
 See `dat/henderson1976.ped` for example.
 """
 function A_inverse(ped::AbstractString)
+    title("Calculate inversed A matrix with pedigree $ped")
     Ai = Any
     open(pipeline(`cat $ped`, `$abgBin/amat D`), "r") do io
         nid = parse(Int, readline(io))
@@ -44,6 +45,7 @@ Given a 2-column pedigree file `ped`, this program calculate inbreeding
 coefficient of everybody in the pedigree.
 """
 function inbreeding_coefficient(ped::AbstractString)
+    title("Calculate inbreeding coefficients with pedigreee $ped")
     ic = Float64[]
     open(pipeline(`cat $ped`, `$abgBin/amat F`), "r") do io
         for line in eachline(io)
@@ -62,6 +64,7 @@ IF a subset of ID `list` of the predigree is given, this gives a partial
 **`A`** matrix. Inverse of this partial **`A`** can be done within `Julia`.
 """
 function A_matrix(ped::AbstractString, list::AbstractString="")
+    title("Calculate A matrix with pedigree $ped")
     ID = Int[]
     A = Float64[]
     println(ped)

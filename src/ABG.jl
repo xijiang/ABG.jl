@@ -2,7 +2,7 @@
 Xijiang's breeding algorithms implemented in Julia and C++.
 """
 module ABG
-using SparseArrays, LinearAlgebra, Serialization
+using SparseArrays, LinearAlgebra, Serialization, Statistics
 
 plink = "bin/plink"             # Update this in your own environment
 abgDir = begin

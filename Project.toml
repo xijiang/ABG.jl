@@ -1,10 +1,11 @@
 name = "ABG"
 uuid = "6f4575a6-10e7-48b2-be77-2501b81e0c82"
 authors = ["Xijiang Yu <xijiang@users.noreply.github.com>"]
-version = "0.2.2"
+version = "0.2.3"
 
 [deps]
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Serialization = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
+Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
