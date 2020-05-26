@@ -238,7 +238,7 @@ end
 Convert plink `bed` to `012` genotypes.
 """
 function plink_012(src, out, species = "cow")
-    _ = read(`$plink --$speces
+    _ = read(`$plink --$species
 		     --bfile $src
 		     --recode A
 		     --out $out`,
