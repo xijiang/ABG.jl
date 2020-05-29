@@ -244,3 +244,20 @@ function plink_012(src, out, species = "cow")
 		     --out $out`,
              String)
 end
+
+"""
+    plink_swap_alleles(src, list, out, species = "cow")
+---
+Recode alleles by swapping the allele codes.  So the genotypes will be changed
+ (0->2, 2->0, 1->1) also.
+"""
+function plink_swap_alleles(src::AbstractString,
+                            list::AbstractString,
+                            out::AbstractString,
+                            species::AbstractString = "cow")
+    _ = read(`$plink --$species
+		     --bfile $src
+		     --update-alleles $list
+		     --out $out`,
+             String)
+end
