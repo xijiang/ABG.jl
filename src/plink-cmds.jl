@@ -258,6 +258,7 @@ function plink_swap_alleles(src::AbstractString,
     _ = read(`$plink --$species
 		     --bfile $src
 		     --update-alleles $list
+                     --make-bed
 		     --out $out`,
              String)
 end
