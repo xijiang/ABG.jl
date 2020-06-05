@@ -42,7 +42,7 @@ end
 Print a `Done` message.
 """
 function done(msg::AbstractString = "Done")
-    printstyled("\t... $msg\n"; color=40)
+    printstyled(" ... $msg\n"; color=40)
 end
 
 function test_my_styled_printing()

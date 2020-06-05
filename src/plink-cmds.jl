@@ -18,12 +18,12 @@ function ped_n_map_to_bed(ped::AbstractString,
                           map::AbstractString,
                           out::AbstractString,
                           species::AbstractString = "cow")
-    _ = read(`$plink --$species
-                     --recode
-                     --make-bed
-                     --ped $ped
-                     --map $map
-                     --out $out`,
+    _ = read(`plink --$species
+                    --recode
+                    --make-bed
+                    --ped $ped
+                    --map $map
+                    --out $out`,
              String);
 end
 
@@ -42,11 +42,11 @@ function bed_snp_subset(src::AbstractString,
                         snp::AbstractString,
                         out::AbstractString,
                         species::AbstractString = "cow")
-    _ = read(`$plink --$species
-                     --bfile $src
-                     --extract $snp
-                     --make-bed
-                     --out $out`,
+    _ = read(`plink --$species
+                    --bfile $src
+                    --extract $snp
+                    --make-bed
+                    --out $out`,
              String)
 end
 
@@ -60,11 +60,11 @@ function miss_allele_stats(bfile::AbstractString,
                            out::AbstractString,
                            species::AbstractString = "cow",
                            chr::AbstractString = "1-29")
-    _ = read(`$plink --$species
-                     --bfile $bfile
-                     --missing
-                     --chr $chr
-                     --out $out`,
+    _ = read(`plink --$species
+                    --bfile $bfile
+                    --missing
+                    --chr $chr
+                    --out $out`,
              String);
 end
 
@@ -78,12 +78,12 @@ function allele_maf_stats(bfile::AbstractString,
                           out::AbstractString,
                           species::AbstractString = "cow",
                           chr::AbstractString = "1-29")
-    _ = read(`$plink --$species
-                     --bfile $bfile
-                     --chr $chr
-                     --nonfounders
-                     --freq
-                     --out $out`,
+    _ = read(`plink --$species
+                    --bfile $bfile
+                    --chr $chr
+                    --nonfounders
+                    --freq
+                    --out $out`,
              String);
 end
 
@@ -97,11 +97,11 @@ function hwe_stats(bfile::AbstractString,
                    out::AbstractString,
                    species::AbstractString = "cow",
                    chr::AbstractString = "1-29")
-    _ = read(`$plink --$species
-                     --bfile $bfile
-                     --chr $chr
-                     --hardy
-                     --out $out`,
+    _ = read(`plink --$species
+                    --bfile $bfile
+                    --chr $chr
+                    --hardy
+                    --out $out`,
                  String);
 end
 
@@ -114,10 +114,10 @@ end
 function merge_beds(list::AbstractString,
                     out::AbstractString,
                     species::AbstractString = "cow")
-    _ = read(`$plink --$species
-                     --merge-list $list
-                     --make-bed
-                     --out $out`,
+    _ = read(`plink --$species
+                    --merge-list $list
+                    --make-bed
+                    --out $out`,
              String)
 end
 
@@ -130,10 +130,10 @@ Convert plink bed files to out in vcf format
 function plink_2_vcf(src::AbstractString,
                      out::AbstractString,
                      species::AbstractString = "cow")
-    _ = read(`$plink --$species
-                     --bfile $src
-                     --recode vcf-iid
-                     --out $out`,
+    _ = read(`plink --$species
+                    --bfile $src
+                    --recode vcf-iid
+                    --out $out`,
              String)
 end
 
@@ -146,10 +146,10 @@ Convert a VCF file to plink.{bed,bim,fam}
 function vcf_2_plink(src::AbstractString,
                      out::AbstractString,
                      species::AbstractString = "cow")
-    _ = read(`$plink --$species
-                     --vcf $src
-                     --const-fid
-                     --out $out`,
+    _ = read(`plink --$species
+                    --vcf $src
+                    --const-fid
+                    --out $out`,
              String)
 end
 
@@ -157,15 +157,15 @@ end
     bed_2_map_n_ped(src::AbstractString, out::AbstractString, species::AbstractString = "cow")
 ---
 
-Recode `$plink.{bed,bim,fam}` to `$plink.{map,ped}`.
+Recode `plink.{bed,bim,fam}` to `plink.{map,ped}`.
 """
 function bed_2_map_n_ped(src::AbstractString,
                          out::AbstractString,
                          species::AbstractString = "cow")
-    _ = read(`$plink --$species
- 		     --bfile $src
-		     --recode
-		     --out $out`,
+    _ = read(`plink --$species
+ 		    --bfile $src
+		    --recode
+		    --out $out`,
              String)
 end
 
@@ -187,13 +187,13 @@ function plink_filter_snp(src::AbstractString,
                           hwe::Float64,
                           out::AbstractString,
                           species::AbstractString = "cow")
-    _ = read(`$plink --$species
-                     --bfile $src
-                     --geno $geno
-                     --maf $maf
-                     --hwe $hwe
-                     --make-bed
-                     --out $out`,
+    _ = read(`plink --$species
+                    --bfile $src
+                    --geno $geno
+                    --maf $maf
+                    --hwe $hwe
+                    --make-bed
+                    --out $out`,
              String)
 end
 
@@ -207,11 +207,11 @@ function plink_filter_id(src::AbstractString,
                          mind::Float64,
                          out::AbstractString,
                          species::AbstractString = "cow")
-    _ = read(`$plink --$species
-		     --bfile $src
-		     --mind $mind
-		     --make-bed
-		     --out $out`,
+    _ = read(`plink --$species
+		    --bfile $src
+		    --mind $mind
+		    --make-bed
+		    --out $out`,
              String)
 end
 
@@ -224,11 +224,11 @@ function plink_keep_id(src::AbstractString,
                        list::AbstractString,
                        out::AbstractString,
                        species::AbstractString = "cow")
-    _ = read(`$plink --$species
-		     --bfile $src
-		     --keep $list
-		     --make-bed
-		     --out $out`,
+    _ = read(`plink --$species
+		    --bfile $src
+		    --keep $list
+		    --make-bed
+		    --out $out`,
              String)
 end
 
@@ -237,28 +237,31 @@ end
 ---
 Convert plink `bed` to `012` genotypes.
 """
-function plink_012(src, out, species = "cow")
-    _ = read(`$plink --$species
-		     --bfile $src
-		     --recode A
-		     --out $out`,
+function plink_012(src::AbstractString,
+                   out::AbstractString,
+                   species = "cow")
+    _ = read(`plink --$species
+		    --bfile $src
+		    --recode A
+		    --out $out`,
              String)
 end
 
+# To be added:
+# plink --bfile [original fileset] --indiv-sort f [file describing new order] --make-bed --out [new prefix]
 """
-    plink_swap_alleles(src, list, out, species = "cow")
+    plink_indiv_sort(src, file, out, species = "cow")
 ---
-Recode alleles by swapping the allele codes.  So the genotypes will be changed
- (0->2, 2->0, 1->1) also.
+Sort `src` plink files according the ID order in `file`, and put the results to `out`.
 """
-function plink_swap_alleles(src::AbstractString,
-                            list::AbstractString,
-                            out::AbstractString,
-                            species::AbstractString = "cow")
-    _ = read(`$plink --$species
-		     --bfile $src
-		     --update-alleles $list
-                     --make-bed
-		     --out $out`,
+function plink_indiv_sort(src::AbstractString,
+                          file::AbstractString,
+                          out::AbstractString,
+                          species = "cow")
+    _ = read(`plink --$species
+		    --bfile $src
+		    --indiv-sort
+		    --make-bed
+		    --out $out`,
              String)
 end

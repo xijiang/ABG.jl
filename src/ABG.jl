@@ -4,7 +4,6 @@ Xijiang's breeding algorithms implemented in Julia and C++.
 module ABG
 using SparseArrays, LinearAlgebra, Serialization, Statistics
 
-plink = "bin/plink"             # Update this in your own environment
 abgDir = begin
     t = splitdir(pathof(ABG))[1]
     l = findlast('/', t)
@@ -17,6 +16,7 @@ abgCpp = joinpath(abgDir, "cpp")
 include("makefile.jl")
 include("a-matrix.jl")
 include("g-matrix.jl")
+include("sort-pedigree.jl")
 
 # v0.1
 ################################################################################
