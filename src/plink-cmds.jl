@@ -247,6 +247,24 @@ function plink_012(src::AbstractString,
              String)
 end
 
+"""
+    force_reference_allele(src, ref_allele_file, out)
+---
+Force to use the alleles specified in `ref_allele_file`, [(snp, allele) x lines], and write the results
+to `out`.
+"""
+function force_reference_allele(src::AbstractString,
+                                ref::AbstractString,
+                                out::AbstractString,
+                                species = "cow")
+    _ = read(`plink --$species
+		    --bfile $src
+		    --reference-allele $ref
+		    --make-bed
+		    --out $out`,
+             String)
+end
+
 # To be added:
 # plink --bfile [original fileset] --indiv-sort f [file describing new order] --make-bed --out [new prefix]
 """
