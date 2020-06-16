@@ -6,14 +6,21 @@
 #include <vector>
 
 /**
- * Remove the header line, and the first 6 columns of a plink.raw file.
- * Also remove all the spaces.
+ * Remove the header line.
+ * Remove the first 6 columns of a plink.raw file.
+ * Remove all the spaces between the genotypes.
+ * Write genotypes to stdout
+ * Calculate the allele frequencies into argv[1].
  */
 using namespace std;
 
 int main(int argc, char *argv[])
 {
   ios_base::sync_with_stdio(false);
+  if(argc !=2){
+    cerr << "Usage: cat plink.raw | "<<argv[0]<<" freq.txt >genotypes"<<endl;
+    return 1;
+  }
   string line, t;
   int nlc{-6}, div{0};
   getline(cin, line);

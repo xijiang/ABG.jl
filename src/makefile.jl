@@ -10,7 +10,7 @@ function make()
     isdir(abgBin) || mkdir(abgBin)
 
     message("Compiling ABG C++ codes in `cpp` into `bin`")
-    bins = ["amat", "raw2gt", "free-space"]
+    bins = ["amat", "raw2gt", "free-space", "freq", "read-block"]
     width = 70
     for bin in bins
         if (!isfile("$abgBin/$bin")) || (stat("$abgBin/$bin").mtime < stat("$abgCpp/$bin.cpp").mtime)

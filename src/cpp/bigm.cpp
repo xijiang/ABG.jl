@@ -49,7 +49,7 @@ size_t mem_plan(const size_t nid, const size_t nlc, double&mem, unsigned&nthread
   // CPU related
   unsigned tth = thread::hardware_concurrency();
   clog << setw(36) << "Number of CPU threads: " << setw(8) << tth << endl;
-  clog << setw(36) << "Number of threads asked: " << setw(8) << nthreads << endl;
+  clog << setw(36) << "Number of threads by default: " << setw(8) << nthreads << endl;
   if(nthreads > tth) nthreads = tth-1;
   if(!nthreads) nthreads = 1;
   clog << setw(36) << "Number of threads assigned: " << setw(8) << nthreads << endl;
@@ -115,18 +115,27 @@ void title(const string&msg){
   clog << endl;
 }
 
+void nuclear(){
+  return;
+}
+
 void calc_block(istream&raw,
-		vector<double>&mi,
-		vector<double>&mj,
-		vector<double>&gblk,
-		const vector<double>&twop,
-		const double&s2pq,
+		const unsigned&nth,
+		const vector<double>&frq,
 		const size_t&lsz,
-		const size_t&nlc,
-		const vector<pair<size_t, size_t>>&range){ // vanRaden method I
-  double alpha{1.};
-  double beta{0.};
-  size_t i, j, k, nblk(range.size());
+		const vector<pair<size_t, size_t>>&range,
+		const vector<pair<int, int>>&tasks){ // vanRaden method I
+  //double alpha{1.};
+  //double beta{0.};
+  thread tsk[nth];
+  //size_t i, j, k, nblk(range.size()), nlc(lsz-1);
+  unsigned t{0};
+  for(auto&[x,y]:tasks){
+    tsk[t++] = thread(nuclear);
+    if(t == nth) for(unsigned i{0}; i<nth; ++i) tsk[i].join();
+  }
+  if(t) for(unsigned i{0}; i<t; ++i) tsk[i].join();
+  /*
   // the nuclear computation block
   for(i=0; i<nblk; ++i){
     clog << '\r' << setw(15) << "block row:" << setw(3) << i+1
@@ -154,6 +163,7 @@ void calc_block(istream&raw,
     }
   }
   clog << endl;
+  */
 }
 
 void merge_block(const vector<pair<size_t, size_t>>&range){
@@ -183,40 +193,43 @@ int main(int argc, char *argv[])
     return 1;
   }
   
-  vector<double> twop;
-  double s2pq{0.};
-  {				// Read frequencies from stdin.
-    double frq;
-    while(cin>>frq){
-      twop.push_back(frq*2);
-      s2pq += 2. * frq * (1-frq);
-    }
-  }
+  vector<double> frq;		// Read frequencies from stdin.
+  for(double f; cin>>f; frq.push_back(f));
   
   ifstream raw(argv[1]);
   if(raw){			// file successfully opened.
+    ////////////////////////////////////////////////////////////
     title("System summary");
     // Determine parameters.
     auto [nid, nlc, lsz] = dims(raw);
     double mem(stof(argv[2]));
     unsigned nthreads(6);
     auto nln = mem_plan(nid, nlc, mem, nthreads);
-    if(nlc != twop.size()){
+    if(nlc != frq.size()){
       throw runtime_error("Numbers of loci don't agree");
       return 2;
     }
-    vector<double> gblk(nln * nln), mi(nln * nlc), mj(nln * nlc);
+    //vector<double> gblk(nln * nln), mi(nln * nlc), mj(nln * nlc);
 
+    ////////////////////////////////////////////////////////////
     title("The calculation procedure");
+    // debug--begin
+    nln = 1;
+    // debug--end
     size_t nblk(nid/nln);
     if(nid%nln) ++nblk;
+    clog << setw(36) << "The genotypes will be dealt with in "<<nblk<<" blocks"<<endl;
     vector<pair<size_t, size_t>> range;
+    vector<pair<int, int>> tasks;
     for(size_t i=0; i<nblk; ++i) range.push_back({i*nln, i*nln+nln});
-    range[nblk-1].second = nid; // blocks determined.
-
-    calc_block(raw, mi, mj, gblk, twop, s2pq, lsz, nlc, range);
-    title("Merge blocks");
-    merge_block(range);
+    //range[nblk-1].second = nid; // blocks determined.
+    //for(auto i{0}; i<static_cast<int>(range.size()); ++i)
+    //  for(auto j{i}; j<static_cast<int>(range.size()); ++j)
+    //	tasks.push_back({i, j});
+    //calc_block(raw, nthreads, frq, lsz, range, tasks);
+    //
+    //title("Merge blocks");
+    //merge_block(range);
     // them merge the small blocks into one big-G
   }else{
     cerr << "Invalid file: " << argv[1] <<'\n';

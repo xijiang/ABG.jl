@@ -12,12 +12,15 @@ abgDir = begin
 end
 abgBin = joinpath(abgDir, "bin")
 abgCpp = joinpath(abgDir, "src/cpp")
+export sandbox_abg
 
 # v0.2
 include("makefile.jl")
 include("a-matrix.jl")
 include("g-matrix.jl")
+include("g-med-stor-m.jl")
 include("sort-pedigree.jl")
+include("cpp/test-bigm.jl")
 
 # v0.1
 ################################################################################

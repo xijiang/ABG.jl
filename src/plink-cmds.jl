@@ -2,8 +2,9 @@
 # Only warnings and errors are printed on screen
 #   - other messages will be stored on disk anyway
 #   - Detailed log can be found in the same directory of `out`
-# All below commands center around `bfile`
-
+# All below commands center around `bfile`.
+# Also, these commands may be combined together.
+# Do that when the options are more familiar to you.
 """
     function ped_n_map_to_bed(ped, map, out, species = "cow")
 ---
