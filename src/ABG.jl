@@ -20,7 +20,6 @@ include("a-matrix.jl")
 include("g-matrix.jl")
 include("g-med-stor-m.jl")
 include("sort-pedigree.jl")
-include("cpp/test-bigm.jl")
 
 # v0.1
 ################################################################################

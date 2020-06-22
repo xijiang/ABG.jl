@@ -1,21 +1,47 @@
 """
-    readIDnGt(file::AbstractString)
+    function read_gt_n_frq(gt::AbstractString, frq::AbstractString)
 ---
-Read ID and genotypes from `file`.  The first column in `file` are ID names.  The rest 
-columns are genotypes for each ID on every locus.
-
-No error check.
+Read genotypes and their frequencies from file `gt` and `frq`.
+Note gt can be prepared like below:
+```
+plink --species --bfile source --recode A --out target
+cat target.raw | pathto/raw2gt target.frq > target.gt
+```
+See also the function `prepare_gt_from_plink_files`.
 """
-function readIDnGt(file::AbstractString)
-    title("ID names and genotypes")
-    ID = String[]
-    Z  = Float64[]
-    for line in eachline(file)
-        v = split(line)
-        push!(ID, v[1])
-        append!(Z, parse.(Float64, v[2:end]))
+function read_gt_n_frq(gt::AbstractString, frq::AbstractString)
+    title("Read genotypes and frequencies")
+    item("Frequency related")
+    # Frequency related
+    p = Float64[]
+    for x in eachline(frq)
+        push!(p, parse(Float64, x))
     end
-    return ID, reshape(Z, :, length(ID))
+    twop = p.*2.
+    s2pq = (1 .- p)'twop
+    done()
+
+    item("Genotypes")
+    nlc = length(readline(gt))
+    fsz = stat(gt).size
+    lsz = nlc + 1               # assuming Unix text format
+    nid = Int(fsz/lsz)
+    if(nid*lsz ≠ fsz)
+        warning("Not a square file")
+        return
+    end
+    message("NID: $nid;\tN_loci: $nlc")
+    z = Array{Float64, 2}(undef, nlc, nid) # one column per ID
+    fgt = open(gt, "r")
+    for j in 1:nid
+        t = read(fgt, lsz)
+        for i in 1:nlc
+            z[i, j] = Float64(t[i] - 0x30) # 0x30 == '0'
+        end
+    end
+    close(fgt)
+    done()
+    return p, twop, s2pq, z
 end
 
 """
@@ -36,13 +62,11 @@ the user.
 
 Pass copy(GT) to this function to avoid GT matrix modification.
 """
-function vanRaden(Z::Array{Float64, 2})
+function vanRaden(Z::Array{Float64, 2}, twop::Array{Float64, 1}, s2pq::Float64)
     title("Calculate G with vanRaden method I")
-    item("Allele frequencies")
-    twop = mean(Z, dims = 2)
-    sum2pq = twop' * (1 .- .5 .* twop)
     Z .-= twop
-    G = Z'Z ./ sum2pq
+    rs2pq = 1. / s2pq
+    G = Z'Z .* rs2pq
 end
 
 """
@@ -100,4 +124,31 @@ function D_matrix(M::Array{Float64, 2})
     end
     s2pq = sum((p .* q .* 2) .^2)
     D = M'M ./s2pq
+end
+
+"""
+Note: function names start with a `_` is just for testing.
+"""
+function _test_grm()
+    nlc = 1000
+    nid = 10
+    M = rand(0:2, nlc, nid)
+    p = mean(M, dims=2) .* .5
+    twop = 2p
+    s2pq = sum((1 .- p) .* twop)
+    r2pq = 1. / s2pq
+    Z = M .- twop
+    if Sys.which("calc_grm") ≠ Nothing
+        inp = ["$nlc", "genotypes.txt", "genotypes", "1", "vanraden",
+               "giv 0.00", "G ASReml", "print_giv=asc", "print_geno=no genotypes.dat",
+               "1", ""]
+        write("tmp/calc_grm.inp", join(inp, '\n'))
+        gt = open("tmp/genotypes.txt", "w")
+        for i in 1:nid
+            print(gt, i, ' ', join(M[:, i]), '\n')
+        end
+        close(gt)
+    end
+    G = Z'Z.*r2pq
+    return p, G
 end
