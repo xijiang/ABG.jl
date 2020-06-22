@@ -18,7 +18,6 @@ function read_gt_n_frq(gt::AbstractString, frq::AbstractString)
         push!(p, parse(Float64, x))
     end
     twop = p.*2.
-    s2pq = (1 .- p)'twop
     done()
 
     item("Genotypes")
@@ -41,7 +40,7 @@ function read_gt_n_frq(gt::AbstractString, frq::AbstractString)
     end
     close(fgt)
     done()
-    return p, twop, s2pq, z
+    return p, twop, z
 end
 
 """
@@ -62,11 +61,12 @@ the user.
 
 Pass copy(GT) to this function to avoid GT matrix modification.
 """
-function vanRaden(Z::Array{Float64, 2}, twop::Array{Float64, 1}, s2pq::Float64)
+function vanRaden(Z::Array{Float64, 2}, twop::Array{Float64, 1})
     title("Calculate G with vanRaden method I")
     Z .-= twop
-    rs2pq = 1. / s2pq
-    G = Z'Z .* rs2pq
+    s2pq = (1 .- .5 .* twop)'twop
+    r2pq = 1. / s2pq
+    G = Z'Z .* r2pq
 end
 
 """
@@ -74,7 +74,7 @@ end
 ---
 Calculate **`G`** with van Raden method II.
 """
-function vanRaden2(W::Array{Float64, 2})
+function vanRadenII(W::Array{Float64, 2})
     title("Calculate G with van Raden method II")
     twop = mean(W, dims=2)
     topq = sqrt.(twop .* (1 .- .5 .* twop))
@@ -124,6 +124,30 @@ function D_matrix(M::Array{Float64, 2})
     end
     s2pq = sum((p .* q .* 2) .^2)
     D = M'M ./s2pq
+end
+
+"""
+    function plink_2_vr_I(file::AbstractString)
+---
+Given the file stem name `file`, this funciton calculate `G` with vanRaden method I.
+Note, data are stored in `file.ped`, `file.bim`, `file.fam`.
+"""
+function plink_2_vr_I(file::AbstractString, species::AbstractString="cow")
+    title("Calculate G from plink data with vanRaden method I")
+    message("   data: $file.{bed,bim,fam}\nSpecies: $species")
+    if Sys.which("plink") == Nothing
+        warning("Command plink can't be find in default paths")
+        return
+    end
+    isfile(joinpath(abgBin, "raw2gt")) || make()
+    tmp = joinpath(workdir, "tmp")
+    isdir(tmp) || mkdir(tmp)
+    plink_012(file, joinpath(tmp, "plink"), species)
+    _ = run(pipeline(joinpath(tmp, "plink.raw"), `$abgBin/raw2gt $tmp/plk.frq`, "$tmp/plk.gt"))
+    _, twop, z = read_gt_n_frq(joinpath(tmp, "plk.gt"), joinpath(tmp, "plk.frq"))
+    G = vanRaden(z, vec(twop))
+    done()
+    return G
 end
 
 """
