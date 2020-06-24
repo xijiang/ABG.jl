@@ -5,8 +5,8 @@
 This procedure is to calculate G-matrix with HD genotypes, where N_id << N_locus.
 
 # Data preparation
-The genotypes can be prepared from plink.bed.  A small c++ program `raw2gt` is 
-available together with this package to convert `target.raw`.
+The genotypes are prepared from plink.bed.  A small c++ program `raw2gt` was
+written together with this package to convert `target.raw`.
 The genotype file should have (`012`) genotypes one ID a line.
 The newline should of *nix convention.
 
@@ -15,11 +15,17 @@ plink --cow --bfile data.bed --recode A --out target # produce target.raw
 cat target.raw | raw2gt raw.frq > raw.gt
 ```
 
+Above can also be finished with function `plink_2_gt` of this package, e.g.,
+```julia
+ABG.plink_2_gt("path-to-plink-file-stem")
+```
+The results will be written to `plk.gt` and `plk.frq` in path `tmp` in the current directory.
+
 # Example
 `ABG.big_G("raw.gt", "raw.frq", 10., 12, "raw.G")`
 
 - **`raw.gt`** is the file prepared above
-- **`raw.G`** is the calculation results
+- **`raw.G`** is the calculation results.  3-column: `raw column element-value` of the `G`-matrix.
 - **`10`**, is the amount of memory to be used in `GiB`.  This amount is to hold two+ genotype blocks.
   The program won't use more than 4/5 of available machine memory.
 - **`12`**: Number of threads to be used.  If you asked more than physical threads, it is set to `1`.
@@ -31,9 +37,9 @@ function G_with_big_M(gt::AbstractString,
                       msize::Float64,
                       nthread::Int64,
                       out::AbstractString)
-    
     title("Calculate G matrix with file $gt, and vanRaden method I")
     tmp = joinpath(workdir, "tmp")
+    isdir(tmp) || mkdir(tmp)
     item("Prepare the system")
     tmem = round(Sys.total_memory()/2^30; digits = 2)
     tthread = Sys.CPU_THREADS
@@ -44,7 +50,7 @@ function G_with_big_M(gt::AbstractString,
     end
     BLAS.set_num_threads(nthread)
     fsize = stat(gt).size
-    fszg = round(fsize/1024^3; digits=2)
+    fszg = round(fsize/1024^3; digits=2) # file size in GiB
     nlc = length(readline(gt))
     lsz = nlc + 1               # assuming *nix file newlines.
     nid = Int(fsize/(nlc+1))
@@ -95,7 +101,7 @@ function G_with_big_M(gt::AbstractString,
         lpad("Free space in current path: ", 36) * lpad("$free GiB\n", 12) *
         lpad("Result files usage: ", 36) * lpad("$disk GiB\n", 12)
     message(msg)
-    write("summary.txt", msg)
+    write("$tmp/summary.txt", msg)
 
     item("Calculate the blocks")
     fgt = open(gt, "r")
@@ -131,6 +137,62 @@ function G_with_big_M(gt::AbstractString,
     end
     done()
 
-    item("Merge and output")
-    done("Suggestions are welcome")
+    item("Merge and output to row col element-value => $out")
+    # dam tedious below.
+    open(out, "w") do io
+        for i in 1:nblk
+            x, y = blks[i, :]
+            nrb = y-x+1         # number rows in the block
+            for j in 1:i-1
+                a, b = blks[j, :]
+                ncb = b-a+1     # number columns in the block
+                dblk = reinterpret(Float64, read("$tmp/$i-$j.blk", nrb*ncb*8))
+                k = 1           # column majored anyway
+                for col in a:b
+                    for row in x:y
+                        print(io, "$row $col ", dblk[k], '\n')
+                        k += 1
+                    end
+                end
+            end
+            # The diagonal blocks
+            dblk = reshape(reinterpret(Float64, read("$tmp/$i-$i.blk", nrb*nrb*8)), nrb, :)
+            for p in x:y
+                for q in x:p
+                    print(io, "$p $q ", dblk[p-x+1, q-x+1], '\n')
+                end
+            end
+        end
+    end
+    done()
+end
+
+"""
+    plink_2_gt(plink, out="plk"; species="cow")
+---
+Convert plink genotypes in `plink`.bed to `012` genotypes, and then remove the first 6
+columns, and spaces in the result file.
+
+## Example
+```
+ABG.plink_2_gt("sample", specices="dog")
+```
+The results will be written to `plk.gt` and `plk.frq`,
+in `tmp` of current working directory.
+"""
+function plink_2_gt(plink::AbstractString, out::AbstractString="plk"; species::AbstractString="cow")
+    title("Convert $plink.bed to genotype file required for this package")
+    message("   data: $plink.{bed,bim,fam}\nSpecies: $species")
+    if Sys.which("plink") == Nothing
+        warning("Command plink can't be find in default paths")
+        return
+    end
+    isfile(joinpath(abgBin, "raw2gt")) || make()
+    tmp = joinpath(workdir, "tmp")
+    isdir(tmp) || mkdir(tmp)
+    plink_012(plink, joinpath(tmp, out), species) # write to tmp/out.raw
+    _ = run(pipeline(joinpath(tmp, "$out.raw"), `$abgBin/raw2gt $tmp/$out.frq`, "$tmp/$out.gt"))
+    message("Results were written to $tmp/$out.gt")
+    rm("$tmp/$out.raw", force=true)
+    done()
 end

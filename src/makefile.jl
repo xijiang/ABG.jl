@@ -23,15 +23,15 @@ function make()
         end
     end
     
-    blas = ["bigm"]
-    for bin in blas
-        if (!isfile("$abgBin/$bin")) || (stat("$abgBin/$bin").mtime < stat("$abgCpp/$bin.cpp").mtime)
-            print(lpad("g++ -O2 -Wall -lopenblas -lpthread -std=c++17 cpp/$bin.cpp -o bin/$bin", width))
-            run(`g++ -O2 -Wall -std=c++17 -lopenblas -lpthread -o $abgBin/$bin $abgCpp/$bin.cpp`)
-            done()
-        else
-            print(lpad("bin/$bin", width))
-            done("OK")
-        end
-    end
+    # blas = ["bigm"]
+    # for bin in blas
+    #     if (!isfile("$abgBin/$bin")) || (stat("$abgBin/$bin").mtime < stat("$abgCpp/$bin.cpp").mtime)
+    #         print(lpad("g++ -O2 -Wall -lopenblas -lpthread -std=c++17 cpp/$bin.cpp -o bin/$bin", width))
+    #         run(`g++ -O2 -Wall -std=c++17 -lopenblas -lpthread -o $abgBin/$bin $abgCpp/$bin.cpp`)
+    #         done()
+    #     else
+    #         print(lpad("bin/$bin", width))
+    #         done("OK")
+    #     end
+    # end
 end
