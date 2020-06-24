@@ -33,6 +33,7 @@ function G_with_big_M(gt::AbstractString,
                       out::AbstractString)
     
     title("Calculate G matrix with file $gt, and vanRaden method I")
+    tmp = joinpath(workdir, "tmp")
     item("Prepare the system")
     tmem = round(Sys.total_memory()/2^30; digits = 2)
     tthread = Sys.CPU_THREADS
