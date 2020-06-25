@@ -75,8 +75,12 @@ function G_with_big_M(gt::AbstractString,
     
     nbid = Int(floor(msize / 2 * 1024^3 / 8 / nlc * .8)) # .8 is arbitrary to avoid GC problem
     nblk = Int(ceil(nid/nbid))
-    free = split(read(pipeline(`$abgBin/free-space .`), String))[2]
-    free = round(parse(Float64, free)/1024^3; digits=2)
+    #free = split(read(pipeline(`$abgBin/free-space .`), String))[2]
+    free = begin
+        statfs = zeros(UInt64, 11)
+        ccall((:statvfs, "libm.so.6"), Cint, (Cstring, Ptr{Cvoid}), ".", statfs)
+        round(convert(Int, statfs[1]*statfs[5])/1024^3; digits=2)
+    end
     disk = round(nid * nid * 8. /1024^3 * 2; digits=2)
 
     if disk >= free
