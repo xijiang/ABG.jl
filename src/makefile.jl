@@ -11,12 +11,12 @@ function make()
 
     message("Compiling ABG C++ codes in `cpp` into `bin`")
     # free-space is removed, as it uses some new c++ features.
-    bins = ["amat", "raw2gt", "freq", "read-block"]
+    bins = ["amat", "raw2gt", "freq", "read-block", "pedsort"]
     width = 70
     for bin in bins
         if (!isfile("$abgBin/$bin")) || (stat("$abgBin/$bin").mtime < stat("$abgCpp/$bin.cpp").mtime)
-            print(lpad("g++ -O2 -Wall -std=c++17 cpp/$bin.cpp -o bin/$bin", width))
-            run(`g++ -O2 -Wall -std=c++17 -o $abgBin/$bin $abgCpp/$bin.cpp`)
+            print(lpad("g++ -O3 -Wall -std=c++17 cpp/$bin.cpp -o bin/$bin", width))
+            run(`g++ -O3 -Wall -std=c++17 -o $abgBin/$bin $abgCpp/$bin.cpp`)
             done()
         else
             print(lpad("bin/$bin", width))
