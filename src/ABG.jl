@@ -2,17 +2,26 @@
 Xijiang's breeding algorithms implemented in Julia and C++.
 """
 module ABG
-using SparseArrays, LinearAlgebra, Serialization, Statistics
+#using SparseArrays, LinearAlgebra, Serialization, Statistics
 
 workdir = pwd()
-abgDir = begin
+abg_bin, abg_cpp, abg_dat = begin
     t = splitdir(pathof(ABG))[1]
-    l = findlast('/', t)
-    SubString(t, 1:l)
+    l = findlast('/', t) - 1
+    d = t[1:l]
+    joinpath.(d, ["bin", "cpp", "dat"])
 end
-abgBin = joinpath(abgDir, "bin")
-abgCpp = joinpath(abgDir, "src/cpp")
-export sandbox_abg
+
+global abg_rst = joinpath(pwd(), "sandbox")
+set_rst(dir) = (global abg_rst = dir)
+
+beagle = joinpath(abg_bin, "beagle.jar")
+plink = joinpath(abg_bin, "plink")
+
+# v0.1
+################################################################################
+include("styled-messages.jl")   # checked 2020-09-13-11:39
+include("final-reports-2-ped.jl")
 
 # v0.2
 include("makefile.jl")
@@ -20,19 +29,19 @@ include("a-matrix.jl")
 include("g-matrix.jl")
 include("g-med-stor-m.jl")
 include("sort-pedigree.jl")
+include("simulation.jl")
 
-# v0.1
-################################################################################
-# export ped_n_map_to_bed, bed_snp_subset, miss_allele_stats, allele_maf_stats
-# export hwe_stats, merge_beds, plink_2_vcf, vcf_2_plink, bed_2_map_n_ped
-# export plink_filter_snp, plink_filter_id
-# export empty_dir
-# export title, message, warning, item, done
-# export fr2ped
-include("styled-messages.jl")
-include("final-reports-2-ped.jl")
-include("work-flow.jl")
-include("misc.jl")
-include("plink-cmds.jl")
+# v0.2.1
+include("bgcf.jl")              # for Theo's `bgcf` program
+include("DMU.jl")               # prepare for the running of DMU
 
+ABG.title("ABG Julia Package")
+ABG.message(lpad("Developed by Xijiang Yu @NMBU", 60),
+            lpad("MIT license", 60),
+            lpad("Copyright © 2020 - " * string(Dates.year(Dates.now())), 60)
+            )
+ABG.Update()
+ABG.message("Current sandbox path is $abg_rst",
+            "You can change it by calling 'ABG.set_rst(your_desired_path)'"
+            )
 end # module

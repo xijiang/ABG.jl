@@ -24,4 +24,4 @@ docs/site/
 Manifest.toml
 notebooks/.ipynb_checkpoints/
 bin/
-tmp/
+sandbox/

@@ -1,5 +1,6 @@
+using LinearAlgebra
 """
-    function read_gt_n_frq(gt::AbstractString, frq::AbstractString)
+    function read_gt_n_frq(gt, frq)
 ---
 Read genotypes and their frequencies from file `gt` and `frq`.
 Note gt can be prepared like below:
@@ -9,8 +10,8 @@ cat target.raw | pathto/raw2gt target.frq > target.gt
 ```
 See also the function `prepare_gt_from_plink_files`.
 """
-function read_gt_n_frq(gt::AbstractString, frq::AbstractString)
-    title("Read genotypes and frequencies")
+function read_gt_n_frq(gt, frq)
+    subtitle("Read genotypes and frequencies")
     item("Frequency related")
     # Frequency related
     p = Float64[]
@@ -44,29 +45,28 @@ function read_gt_n_frq(gt::AbstractString, frq::AbstractString)
 end
 
 """
-    vanRaden(Z::Array{Float64, 2})
+    vanRaden(Z, twop, d = 0.)
 ---
 This function calculate **`G`** with van Raden 2008 on genotype **`Z`**.
 method I.  Note **`Z`** here is ID column majored.
 
-`G = Z`Z/2Σp_i(1-p_i)`
+`G = Z'Z/2Σp_i(1-p_i)`
 
-where **`Z`** contains the marker genotypes for all animals at all loci, corrected for 
+where **`Z`** contains the marker genotypes of value 0, 1 or 2 for all animals
+at all loci.  It is then corrected by the passed `twop`, 
 the allele frequency per locus, and `p_i` is the frequency of the allele at locus 
-*i* coded with the highest integer value.  **`Z`** is derived from the genotypes of the 
-animals by subtracting 2 times the allele frequency, that is `2p_i`, from matrix 
-**`X`**, which specifies the marker genotypes for each individual as 0, 1 or 2. Values 
-for `p_i` are calculated from the data (default), or can be specified in a file by 
-the user.
+*i* coded with `1`.  
 
-Pass copy(GT) to this function to avoid GT matrix modification.
+One may pass `copy(Z)` to this function to avoid GT matrix modification.
+
+The diaganols will be added `d`, which is by default `0`.
 """
-function vanRaden(Z::Array{Float64, 2}, twop::Array{Float64, 1})
-    title("Calculate G with vanRaden method I")
+function vanRaden(Z, twop, d = 0.)
+    subtitle("Calculate G with vanRaden method I")
     Z .-= twop
     s2pq = (1 .- .5 .* twop)'twop
     r2pq = 1. / s2pq
-    G = Z'Z .* r2pq
+    G = Z'Z .* r2pq + I(size(Z)[2]) .* d
 end
 
 """
@@ -75,7 +75,7 @@ end
 Calculate **`G`** with van Raden method II.
 """
 function vanRadenII(W::Array{Float64, 2})
-    title("Calculate G with van Raden method II")
+    subtitle("Calculate G with van Raden method II")
     twop = mean(W, dims=2)
     topq = sqrt.(twop .* (1 .- .5 .* twop))
     W .-= twop
@@ -89,7 +89,7 @@ end
 Calculate **`G`** with Yang Jian's method.
 """
 function yangG(W::Array{Float64, 2})
-    title("Calculate G with Yang's method")
+    subtitle("Calculate G with Yang's method")
 
     message("Will address this later")
     # twop = mean(W, dims=2)
@@ -112,7 +112,7 @@ end
 Calculate **`D`** (dominance relationship) matrix with genotypes given.
 """
 function D_matrix(M::Array{Float64, 2})
-    title("Dominance relationship matrix")
+    subtitle("Dominance relationship matrix")
     p = mean(M, dims=2).* .5
     q = 1 .- p
     op = [vec(-2 .* p .* p) vec(2 .*p .* q)  vec(-2 .*q .* q)]
@@ -133,7 +133,7 @@ Given the file stem name `file`, this funciton calculate `G` with vanRaden metho
 Note, data are stored in `file.ped`, `file.bim`, `file.fam`.
 """
 function plink_2_vr_I(file::AbstractString, species::AbstractString="cow")
-    title("Calculate G from plink data with vanRaden method I")
+    subtitle("Calculate G from plink data with vanRaden method I")
     message("   data: $file.{bed,bim,fam}\nSpecies: $species")
     if Sys.which("plink") == Nothing
         warning("Command plink can't be find in default paths")
