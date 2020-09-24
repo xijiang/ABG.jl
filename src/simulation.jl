@@ -4,6 +4,17 @@ using Statistics
 ---
 # Description
 Simulation of QTL and phenotypes with the toy dataset comes with this package.
+The data were randomly sampled on ID and SNP from a project I worked on.
+
+# Results
+- `toy.raw`: from `plink`.
+- `toy.frq`: from `raw2gt`.
+- `toy.gt`:  from `raw2gt`. genotype of `012` only, without spaces.
+- `toy.ph`:  simulated phenotypes corresponding to ID in `toy.fam`.
+- `toy.bv`: the true breeding values.
+- `toy.qtl`: QTL location index and value.
+- `toy.G`: `G` matrix with vanRaden method I, with diagonals added 1e-4.
+- `toy.giv`: Above inversed.
 """
 function simu_qp(h2 = 0.8)
     subtitle("Simulation QTL and phenotypes with toy data")
