@@ -176,3 +176,38 @@ function _test_grm()
     G = Z'Z.*r2pq
     return p, G
 end
+
+
+"""
+    inv_3c_G(file, out)
+---
+Invert a G-matrix stored in file `file`, and put the results to `out`.
+"""
+function inv_3c_G(file, out)
+    nid, G = begin
+        tmp = Float64[]
+        for line in eachline(file)
+            t = parse(Float64, split(line)[3])
+            push!(tmp, t)
+        end
+        l = length(tmp)
+        nid = Int(floor((sqrt(8l+1)-1)/2))
+        g = zeros(nid, nid)
+        k = 1
+        for i in 1:nid
+            for j in 1:i
+                g[i, j] = g[j, i] = tmp[k]
+                k += 1
+            end
+        end
+        nid, g
+    end
+    giv = inv(G)
+    open(out, "w") do io
+        for i in 1:nid
+            for j in 1:i
+                println(io, "$i $j ", giv[i,j])
+            end
+        end
+    end
+end
